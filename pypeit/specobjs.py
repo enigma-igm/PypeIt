@@ -537,37 +537,6 @@ class SpecObjs:
         
         return indx
 
-    # def slitorder_objid_indices(self, slitorder, objid, toler=5):
-    #     """
-    #     Return the set of indices matching the input slit/order and the input
-    #     objid
-        
-    #     Args:
-    #         slitorder (int):
-    #             Order/Spatial pixel value for slit of interest.
-    #         objid (int):
-    #             ID value for object of interest.
-    #         toler (int, optional):
-    #             Tolerance for slit spatial pixel values used for slit
-    #             identification. Default = 5
-
-    #     Returns:
-    #         :obj:`int`: Index value for input slit/order and object ID values
-    #         for specobjs object.
-
-    #     """
-
-    #     if self[0].PYPELINE == 'Echelle':
-    #         indx = (self.ECH_ORDER == slitorder) & (self.ECH_OBJID == objid)
-    #     elif self[0].PYPELINE == 'MultiSlit':
-    #         indx = (np.abs(self.SLITID - slitorder) <= toler) & (self.OBJID == objid)
-    #     elif self[0].PYPELINE == 'SlicerIFU':
-    #         indx = (self.SLITID == slitorder) & (self.OBJID == objid)
-    #     else:
-    #         msgs.error("The '{0:s}' PYPELINE is not defined".format(self[0].PYPELINE))
-    #     #
-    #     return indx
-
     def set_names(self):
         """
         Simple method to (re)set the names of all the SpecObj
@@ -952,8 +921,8 @@ class SpecObjs:
         """
         # TODO -- Deal with update_det
         # Lists for a Table
-        slits, names, maskdef_id, objname, objra, objdec, spat_pixpos, spat_fracpos, boxsize, opt_fwhm, s2n = \
-            [], [], [], [], [], [], [], [], [], [], []
+        slits, names, obj_ids, maskdef_id, objname, objra, objdec, spat_pixpos, spat_fracpos, boxsize, opt_fwhm, s2n = \
+            [], [], [], [], [], [], [], [], [], [], [], []
         wave_rms = []
         maskdef_extract = []
         manual_extract = []
@@ -971,14 +940,17 @@ class SpecObjs:
                 spat_fracpos.append(specobj.SPAT_FRACPOS)
                 slits.append(specobj.SLITID)
                 names.append(specobj.NAME)
+                obj_ids.append(specobj.SPAT_PIXPOS_ID)
             elif pypeline == 'SlicerIFU':
                 spat_fracpos.append(specobj.SPAT_FRACPOS)
                 slits.append(specobj.SLITID)
                 names.append(specobj.NAME)
+                obj_ids.append(specobj.SPAT_PIXPOS_ID)
             elif pypeline == 'Echelle':
                 spat_fracpos.append(specobj.ECH_FRACPOS)
                 slits.append(specobj.ECH_ORDER)
                 names.append(specobj.ECH_NAME)
+                obj_ids.append(specobj.ECH_FRACPOS_ID)
             # Wave RMS
             wave_rms.append(specobj.WAVE_RMS)
             # Boxcar width
@@ -1024,6 +996,7 @@ class SpecObjs:
                 obj_tbl['order'] = slits
                 obj_tbl['order'].format = 'd'
             obj_tbl['name'] = names
+            obj_tbl['obj_id'] = obj_ids
             if not np.all(np.array(maskdef_id) == None):
                 obj_tbl['maskdef_id'] = maskdef_id
             if not np.all(np.array(objname) == None):
