@@ -22,7 +22,7 @@ from pypeit.spectrographs.util import load_spectrograph
 from pypeit.display import display
 
 from astropy.stats import sigma_clipped_stats, SigmaClip
-# NOTE: photutils is an optional dependency
+# NOTE: photutils is an optional dependency for Gaussian2d fitting. 
 try:
     from photutils.detection import DAOStarFinder
 except ModuleNotFoundError:
