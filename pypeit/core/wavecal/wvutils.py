@@ -15,6 +15,7 @@ import scipy
 from astropy.table import Table
 from astropy import convolution
 from astropy import constants
+from astropy.io import fits
 
 from pypeit import msgs
 from pypeit import cache
@@ -205,7 +206,9 @@ def get_wave_grid(waves=None, gpms=None, wave_method='linear', iref=0, wave_grid
             ``spec_samp_fact``, i.e. units ``spec_samp_fact`` are pixels.
         wave_grid_input (`numpy.ndarray`_, optional):
             User input wavelength grid to be used with the 'user_input' wave_method. 
-            Shape is (nspec_input,)
+            This must either be a `numpy.ndarray`_ with shape is (nspec_input,) or 
+            a string with the name of a .fits file containing the wavelength grid.
+            The file should be readable via wave_grid = fits.getdata(wave_grid_input).
 
     Returns:
         :obj:`tuple`: Returns two `numpy.ndarray`_ objects and a float:
@@ -231,7 +234,11 @@ def get_wave_grid(waves=None, gpms=None, wave_method='linear', iref=0, wave_grid
     c_kms = constants.c.to('km/s').value
 
     if wave_method == 'user_input':
-        wave_grid = wave_grid_input
+        if isinstance(wave_grid_input, np.ndarray):
+            wave_grid = wave_grid_input
+        elif isinstance(wave_grid_input, str):
+            wave_grid = fits.getdata(wave_grid_input)
+            msgs.info(f'Using user input wavelength grid from {wave_grid_input}')
     else:
 
         _gpms = [wave > 1.0 for wave in waves] if gpms is None else gpms
@@ -313,7 +320,6 @@ def get_wave_grid(waves=None, gpms=None, wave_method='linear', iref=0, wave_grid
         # the convention in wavegrid above
         wave_grid_mid = wave_grid_mid[:-1]
 
-    embed()
     return wave_grid, wave_grid_mid, dsamp
 
 

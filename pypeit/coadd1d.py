@@ -353,7 +353,8 @@ class MultiSlitCoAdd1D(CoAdd1D):
         # Perform the coadd
         wave_grid_mid, wave_coadd, flux_coadd, ivar_coadd, gpm_coadd = \
             coadd.multi_combspec(_waves, _fluxes, _ivars, _gpms,
-            sn_smooth_npix=self.par['sn_smooth_npix'], wave_method=self.par['wave_method'],
+            sn_smooth_npix=self.par['sn_smooth_npix'], 
+            wave_method=self.par['wave_method'], wave_grid_input=self.par['wave_grid_input'],
             dv=self.par['dv'], dwave=self.par['dwave'], dloglam=self.par['dloglam'],
             wave_grid_min=self.par['wave_grid_min'], wave_grid_max=self.par['wave_grid_max'],
             spec_samp_fact=self.par['spec_samp_fact'], ref_percentile=self.par['ref_percentile'],
@@ -446,6 +447,7 @@ class EchelleCoAdd1D(CoAdd1D):
                                      setup_ids=self.unique_setups,
                                      nbests=self.par['nbests'],
                                      wave_method=self.par['wave_method'],
+                                     wave_grid_input=self.par['wave_grid_input'],
                                      dv=self.par['dv'], dwave=self.par['dwave'], dloglam=self.par['dloglam'],
                                      wave_grid_min=self.par['wave_grid_min'],
                                      wave_grid_max=self.par['wave_grid_max'],

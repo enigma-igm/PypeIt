@@ -1211,7 +1211,7 @@ class Coadd1DPar(ParSet):
     see :ref:`parameters`.
     """
     def __init__(self, ex_value=None, flux_value=None, nmaskedge=None,
-                 sn_smooth_npix=None, sigrej_exp=None, wave_method=None, dv=None, dwave=None, dloglam=None,
+                 sn_smooth_npix=None, sigrej_exp=None, wave_method=None, wave_grid_input=None, dv=None, dwave=None, dloglam=None,
                  wave_grid_min=None, wave_grid_max=None, spec_samp_fact=None, ref_percentile=None, maxiter_scale=None,
                  sigrej_scale=None, scale_method=None, sn_min_medscale=None, sn_min_polyscale=None,
                  weight_method=None, maxiter_reject=None,
@@ -1270,7 +1270,16 @@ class Coadd1DPar(ParSet):
                                "'velocity' -- Grid is uniform in velocity.  " \
                                "'log10' -- Grid is uniform in log10(wave). This is the same as velocity.  " \
                                "'linear' -- Grid is uniform in lambda.  " \
-                               "'concatenate' -- Meld the input wavelength arrays"
+                               "'concatenate' -- Meld the input wavelength arrays" \
+                               "* 'user_input' -- Use a user defined wavelength grid, which is specified by the " \
+                               "``wave_grid_input`` parameter which points to a .fits file with the user specified grid." 
+
+
+        defaults['wave_grid_input'] = None
+        dtypes['wave_grid_input'] = str
+        descr['wave_grid_input'] = "Argument to :func:`~pypeit.core.wavecal.wvutils.get_wave_grid` method for the case of wave_method='user_input'" \
+                                   "This is the name of a .fits file with the user defined wavelength grid. " \
+                                   "The file should be readable via wave_grid = fits.getdata(wave_grid_input)." 
 
         defaults['dv'] = None
         dtypes['dv'] = [int, float]
@@ -1428,7 +1437,7 @@ class Coadd1DPar(ParSet):
     def from_dict(cls, cfg):
         k = np.array([*cfg.keys()])
         parkeys = ['ex_value', 'flux_value', 'nmaskedge', 'sn_smooth_npix', 'sigrej_exp',
-                   'wave_method', 'dv', 'dwave', 'dloglam', 'wave_grid_min', 'wave_grid_max',
+                   'wave_method', 'wave_grid_input', 'dv', 'dwave', 'dloglam', 'wave_grid_min', 'wave_grid_max',
                    'spec_samp_fact', 'ref_percentile', 'maxiter_scale', 'sigrej_scale', 'scale_method',
                    'sn_min_medscale', 'sn_min_polyscale', 'weight_method', 'maxiter_reject', 'lower', 'upper',
                    'maxrej', 'sn_clip', 'nbests', 'coaddfile',
@@ -1477,7 +1486,7 @@ class Coadd1DPar(ParSet):
     def valid_wave_methods():
         """ Return the valid options for the wavelength grid of spectra. """
 
-        return ['iref', 'velocity', 'log10', 'linear', 'concatenate']
+        return ['iref', 'velocity', 'log10', 'linear', 'concatenate', 'user_input']
 
     @staticmethod
     def valid_scale_methods():
@@ -1601,7 +1610,7 @@ class Coadd2DPar(ParSet):
                                   "* 'iref' -- Use one of the exposures (the first) as the reference for the wavelength grid " \
                                   "* 'velocity' -- Grid is uniform in velocity" \
                                   "* 'log10'  -- Grid is uniform in log10(wave). This is the same as velocity." \
-                                  "* 'linear' -- Grid is uniform in wavelength" \
+                                  "* 'linear' -- Grid is uniform in wavelength" 
 
 
         defaults['spec_samp_fact'] = 1.0
