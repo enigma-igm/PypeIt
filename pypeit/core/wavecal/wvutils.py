@@ -233,13 +233,13 @@ def get_wave_grid(waves=None, gpms=None, wave_method='linear', iref=0, wave_grid
     if wave_method == 'user_input':
         wave_grid = wave_grid_input
     else:
-        if gpms is None:
-            gpms = [wave > 1.0 for wave in waves]
+
+        _gpms = [wave > 1.0 for wave in waves] if gpms is None else gpms
 
         if wave_grid_min is None:
-            wave_grid_min = np.min([wave[gpm].min() for wave, gpm in zip(waves, gpms)])
+            wave_grid_min = np.min([wave[gpm].min() for wave, gpm in zip(waves, _gpms)])
         if wave_grid_max is None:
-            wave_grid_max = np.max([wave[gpm].max() for wave, gpm in zip(waves, gpms)])
+            wave_grid_max = np.max([wave[gpm].max() for wave, gpm in zip(waves, _gpms)])
 
         dwave_data, dloglam_data, resln_guess, pix_per_sigma = get_sampling(waves)
 
@@ -313,7 +313,7 @@ def get_wave_grid(waves=None, gpms=None, wave_method='linear', iref=0, wave_grid
         # the convention in wavegrid above
         wave_grid_mid = wave_grid_mid[:-1]
 
-
+    embed()
     return wave_grid, wave_grid_mid, dsamp
 
 
