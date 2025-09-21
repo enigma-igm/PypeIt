@@ -935,7 +935,6 @@ class CoAdd2D:
                         # TODO -- OPT_MASK is likely to become a bpm with int values
                         #gpm[:self.nspec_array[iexp], indx] = spec.OPT_MASK
                         #indx += 1
-
         return wvutils.get_wave_grid(waves=waves, gpms=gpms, wave_method=self.wave_method(),
                                                                 spec_samp_fact=self.par['coadd2d']['spec_samp_fact'])
 

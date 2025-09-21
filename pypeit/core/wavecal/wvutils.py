@@ -296,7 +296,7 @@ def get_wave_grid(waves=None, gpms=None, wave_method='linear', iref=0, wave_grid
 
         elif wave_method == 'iref': # Use the iref index wavelength array
             msgs.info(f'iref for the list is set to {iref}')
-            msgs.info(f'The shape of the list is: {np.shape(waves)}')
+            msgs.info(f'The shape of the list is: {np.shape(utils.explist_to_array(waves)[0])}')
             msgs.info(f'shape of the first wave_grid in the list is: {np.shape(waves[iref])}')
             wave_tmp = waves[iref]
             wave_grid = wave_tmp[wave_tmp > 1.0]
