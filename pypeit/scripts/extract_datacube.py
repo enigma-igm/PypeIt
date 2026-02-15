@@ -17,8 +17,11 @@ class ExtractDataCube(scriptbase.ScriptBase):
 
     @classmethod
     def get_parser(cls, width=None):
-        parser = super().get_parser(description='Read in a datacube, extract a spectrum of a point source,'
-                                                'and save it as a spec1d file.', width=width)
+        parser = super().get_parser(
+            description='Read in a datacube, extract a spectrum of a point source, and save it as '
+                        'a spec1d file.',
+            width=width, default_log_file=True
+        )
         parser.add_argument('file', type = str, default=None, help='spec3d.fits DataCube file')
         parser.add_argument("-e", "--ext_file", type=str,
                             help='Configuration file with extraction parameters')
@@ -35,23 +38,24 @@ class ExtractDataCube(scriptbase.ScriptBase):
         parser.add_argument("--debug", default=False, action="store_true", help="show debug plots?")
         return parser
 
-    @staticmethod
-    def main(args):
+    @classmethod
+    def main(cls, args):
         import time
 
-        from pypeit import msgs
+        from pypeit import log
+        from pypeit import PypeItError
         from pypeit import par
         from pypeit import inputfiles
         from pypeit import utils
         from pypeit.spectrographs.util import load_spectrograph
         from pypeit.coadd3d import DataCube, CoAdd3D
 
-        # Set the verbosity, and create a logfile if verbosity == 2
-        msgs.set_logfile_and_verbosity('extract_datacube', args.verbosity)
+        # Initialize the log
+        cls.init_log(args)
 
         # Check that a file has been provided
         if args.file is None:
-            msgs.error('You must input a spec3d (i.e. PypeIt DataCube) fits file')
+            raise PypeItError('You must input a spec3d (i.e. PypeIt DataCube) fits file')
         extcube = DataCube.from_file(args.file)
         spectrograph = load_spectrograph(extcube.PYP_SPEC)
 
@@ -68,24 +72,24 @@ class ExtractDataCube(scriptbase.ScriptBase):
         # Set the boxcar radius
         boxcar_radius = args.boxcar_radius
 
-        # Set the output name. If one was provided by the user 
+        # Set the output name. If one was provided by the user
         if args.save is not None:
             par['cube_extraction']['output_filename'] = args.save
         if args.boxcar_radius is not None:
             par['cube_extraction']['boxcar_radius'] = args.boxcar_radius
-        
+
         # Load the DataCube
         tstart = time.time()
 
-        
+
         # Get the paths
         coadd_scidir, qa_path = map(lambda x : Path(x).absolute(),
                 CoAdd3D.output_paths(args.file, parset, coadd_dir=parset['rdx']['redux_path']))
 
         # Extract the spectrum
         extcube.extract_spec(
-            parset['reduce']['cube_extraction'], output_dir=str(coadd_scidir), overwrite=args.overwrite, 
+            parset['reduce']['cube_extraction'], output_dir=str(coadd_scidir), overwrite=args.overwrite,
             debug=args.debug)
 
         # Report the extraction time
-        msgs.info(utils.get_time_string(time.time()-tstart))
+        log.info(utils.get_time_string(time.time()-tstart))

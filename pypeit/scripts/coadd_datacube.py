@@ -12,8 +12,10 @@ class CoAddDataCube(scriptbase.ScriptBase):
 
     @classmethod
     def get_parser(cls, width=None):
-        parser = super().get_parser(description='Read in an array of spec2D files and convert '
-                                                'them into a datacube', width=width)
+        parser = super().get_parser(
+            description='Read in an array of spec2D files and convert them into a datacube',
+            width=width, default_log_file=True
+        )
         parser.add_argument('file', type = str, default=None, help='filename.coadd3d file')
         parser.add_argument('--det', default=1, type=int, help="Detector")
         parser.add_argument('-o', '--overwrite', default=False, action='store_true',
@@ -24,24 +26,25 @@ class CoAddDataCube(scriptbase.ScriptBase):
         parser.add_argument("--debug", default=False, action="store_true", help="show debug plots?")
         return parser
 
-    @staticmethod
-    def main(args):
+    @classmethod
+    def main(cls, args):
         import time
 
         from pathlib import Path
-        from pypeit import msgs
+        from pypeit import log
+        from pypeit import PypeItError
         from pypeit import par
         from pypeit import inputfiles
         from pypeit import utils
         from pypeit.coadd3d import CoAdd3D
         from pypeit.spectrographs.util import load_spectrograph
 
-        # Set the verbosity, and create a logfile if verbosity == 2
-        msgs.set_logfile_and_verbosity('coadd_datacube', args.verbosity)
+        # Initialize the log
+        cls.init_log(args)
 
         # Check that a file has been provided
         if args.file is None:
-            msgs.error('You must input a coadd3d file')
+            raise PypeItError('You must input a coadd3d file')
 
         # Read in the relevant information from the .coadd3d file
         coadd3dfile = inputfiles.Coadd3DFile.from_file(args.file)
@@ -54,7 +57,7 @@ class CoAddDataCube(scriptbase.ScriptBase):
 
         # If detector was passed as an argument override whatever was in the coadd3d file
         if args.det is not None:
-            msgs.info("Restricting to detector={}".format(args.det))
+            log.info("Restricting to detector={}".format(args.det))
             parset['rdx']['detnum'] = int(args.det)
 
         # Extract the options
@@ -64,8 +67,8 @@ class CoAddDataCube(scriptbase.ScriptBase):
         scale_corr = coadd3dfile.options['scale_corr']
         sensfile = coadd3dfile.options['sensfile']
         grating_corr = coadd3dfile.options['grating_corr']
-        
-        
+
+
         # Get the paths
         coadd_scidir, qa_path = map(lambda x : Path(x).absolute(),
                 CoAdd3D.output_paths(coadd3dfile.filenames, parset, coadd_dir=parset['rdx']['redux_path']))
@@ -77,14 +80,14 @@ class CoAddDataCube(scriptbase.ScriptBase):
 
         # Instantiate CoAdd3d
         tstart = time.time()
-        coadd = CoAdd3D.get_instance(coadd3dfile.filenames, parset, 
-                                     output_dir=str(coadd_scidir), 
+        coadd = CoAdd3D.get_instance(coadd3dfile.filenames, parset,
+                                     output_dir=str(coadd_scidir),
                                      skysub_frame=skysub_frame, sensfile=sensfile,
                                      scale_corr=scale_corr, grating_corr=grating_corr,
                                      ra_offsets=ra_offsets, dec_offsets=dec_offsets,
-                                     spectrograph=spectrograph, det=args.det, overwrite=args.overwrite, 
+                                     spectrograph=spectrograph, det=args.det, overwrite=args.overwrite,
                                      debug=args.debug)
 
         # Coadd the files
         coadd.run()
-        msgs.info(utils.get_time_string(time.time()-tstart))
+        log.info(utils.get_time_string(time.time()-tstart))
