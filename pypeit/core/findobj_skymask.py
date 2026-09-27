@@ -2088,6 +2088,12 @@ def objs_in_slit(image, ivar, thismask, slit_left, slit_righ,
     else:
         find_min_max_out = np.array(find_min_max).astype(int)
 
+    # SlitTraceSet uses -1 and nspec as open bounds to include the full slit.
+    # Clip them before using them as Python slice indices below.
+    find_min_max_out = np.clip(find_min_max_out, 0, nspec)
+    if find_min_max_out[0] >= find_min_max_out[1]:
+        raise ValueError(f'Invalid object-finding spectral range: {find_min_max_out}')
+
     #totmask = thismask & inmask & np.logical_not(edgmask)
     #  Smash the image (for this slit) into a single flux vector.  How many pixels wide is the slit at each Y?
     xsize = slit_righ - slit_left
